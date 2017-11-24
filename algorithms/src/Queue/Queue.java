@@ -18,7 +18,7 @@ public class Queue<T extends Comparable <T>> {
 		this.count++;
 		
 		Node<T> oldLastNode = this.lastNode;
-		this.lastNode = new Node<>(newData);
+		//this.lastNode = new Node<>(newData);
 		this.lastNode.setNextNode(null);
 		
 		if (isEmpty() ){
