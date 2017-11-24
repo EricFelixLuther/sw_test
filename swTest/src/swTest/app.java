@@ -19,17 +19,17 @@ public class app {
 			top += 1;
 			stack[top] = cords;
 		}
-		public void pop(){
-			if(!isEmpty()){
-				top -= 1;
-			}
+		public int[] pop(){
+			int[] cords = {stack[top][0], stack[top][1]};
+			top -= 1;
+			return cords;
 		}
 		public boolean isEmpty(){
 			return top==-1;
 		}
-		public boolean inStack(int[] cords){
+		public boolean inStack(int x, int y){
 			for(int i=0; i< this.size; i++){
-				if(stack[i] == cords){
+				if(stack[i][0] == x && stack[i][1] == y){
 					return true;
 				}
 			}
@@ -39,48 +39,61 @@ public class app {
 			top = -1;
 			stack = new int[this.size][2];
 		}
+		
+		public void print(){
+			for(int i = 0; i < this.top; i++){
+				System.out.print(stack[i][0] + "," + stack[i][1] + "  ");
+			}
+			System.out.println();
+		}
 	}
 	
-	public static void walk(int startx, int starty, int player, int[][] map, int size){
-		if(visited.isEmpty()){
-			return;  // Failed enclosure
+	public static int walk(int startx, int starty, int player, int[][] map, int size){
+		//System.out.println(map[startx][starty]);
+		if(startx >= size || starty >= size || startx < 0 || starty < 0){
+			System.out.println("out of the map: " + startx + "," + starty);
+			return player;  // Out of map
+		}
+		if(visited.inStack(startx, starty)){
+			System.out.println("visited: " + startx + "," + starty);
+			return player;  // Node already visited 
 		}
 		int[] cords = {startx, starty};
-		if(visited.inStack(cords)){
-			return;  // Node already visited 
-		}
+		visited.push(cords);
 		
 		if(player == 0 && map[startx][starty] != 0){ // Found a player
 			player = map[startx][starty];
-			return;
+			System.out.println("player found: " + player + " @ " + startx + "," + starty);
+			return player;
 		} else if (player != 0  && map[startx][starty] != player){  // failed enclosure
-			visited.flushStack();
-			return;
-		} else {
-			visited.push(cords);
+			player = 5;
+			System.out.println("Failed enclosure @ " + startx + "," + starty);
+			return player;
 		}
 			
 			
 		// Go down
 		if(startx >= 0 && startx < size - 1){
-			walk(startx + 1, starty, player, map, size);
-		}
-		// Go left
-		if(starty > 0 && starty < size){
-			walk(startx, starty - 1, player, map, size);
-		}
-		// Go up
-		if(startx > 0 && startx < size - 1){
-			walk(startx - 1, starty, player, map, size);
+			player = walk(startx + 1, starty, player, map, size);
 		}
 		// Go right
 		if(starty >= 0 && starty < size){
-			walk(startx, starty + 1, player, map, size);
+			player = walk(startx, starty + 1, player, map, size);
 		}
+		// Go up
+		if(startx > 0 && startx < size - 1){
+			player = walk(startx - 1, starty, player, map, size);
+		}
+		// Go left
+		if(starty > 0 && starty < size){
+			player = walk(startx, starty - 1, player, map, size);
+		}
+		
+		return player;
 	}
 	
 	public static void main(String[] args) throws Exception {
-		System.setIn(new java.io.FileInputStream("src/swTest/black_and_white.txt"));
+		System.setIn(new java.io.FileInputStream("swTest/src/swTest/black_and_white.txt"));
 		Scanner sc = new Scanner(System.in);
 		
 		int[][] map;
@@ -125,9 +138,24 @@ public class app {
 					if(curr_field == 0){
 						// Check enclosure
 						visited = new Stack(size*size - one_sum_before - two_sum_before);
-						int[] cords = {i, o};
-						visited.push(cords);
-						walk(i, o, curr_field, map, size);
+						int player = walk(i, o, curr_field, map, size);
+						visited.print();
+						System.out.println(player);
+						while(visited.isEmpty() != true){
+							System.out.println("HERE");
+							int[] cords = visited.pop();
+							int x = cords[0];
+							int y = cords[1];
+							if(map[x][y] == 0){
+								map[x][y] = player;
+							}
+						}
+						for(int x=0; x<map.length; x++){
+							for(int y=0; y<map[x].length; y++){
+								System.out.print(map[x][y]);
+							}
+							System.out.println();
+						}
 					}
 				}
 			}
