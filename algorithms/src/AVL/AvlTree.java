@@ -6,11 +6,9 @@ public class AvlTree implements Tree {
 	public void insert(int data) {
 		root = insert(root, data);
 	}
-	
-	public void delete(int data) {
-		root = delete(root, data);
-	}
-	
+
+
+
 	private Node insert(Node node, int data) {
 		if(node == null) {
 			return new Node(data);
@@ -64,6 +62,13 @@ public class AvlTree implements Tree {
 		}
 		node.setHeight(Math.max(height(node.getLeftNode()), height(node.getRightNode())) + 1);
 		return settleDeletion(node);
+	}
+
+	@Override
+	public void delete(int data) {
+		if(root != null){
+			root = delete(root, data);
+		}
 	}
 	
 	private Node settleDeletion(Node node) {
