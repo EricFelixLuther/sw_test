@@ -14,5 +14,4 @@ public class app {
 		avl.delete(5);
 		avl.traverse();
 	}
-
 }
