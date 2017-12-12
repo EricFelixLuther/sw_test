@@ -51,8 +51,10 @@ public class app {
 		}
 		public void push(int x){
 			int last_item = this.peek();
-			if(last_item >= 0 && last_item != x){
-				this.is_homogenic = false;
+			if(last_item >= 0) {
+				if(last_item != x){
+					this.is_homogenic = false;
+			}
 			}
 			this.top += 1;
 			this.stack[top] = x;
@@ -67,6 +69,14 @@ public class app {
 				return this.stack[this.top];
 			}
 			return -1;
+		}
+		@Override
+		public String toString() {
+			String str = new String();
+			for(int i = 0; i <= this.top; i++) {
+				str += this.stack[i] + ", "; 
+			}
+			return str;
 		}
 	}
 	
@@ -90,18 +100,26 @@ public class app {
 		public boolean is_empty(){
 			return this.top == -1;
 		}
+		@Override
+		public String toString() {
+			String str = new String();
+			for(int i = 0; i <= this.top; i++) {
+				str += this.stack[i] + ", "; 
+			}
+			return str;
+		}
 	}
 
 	
 	public static void walk(int x, int y){
 		Node node = map[y][x];
-		System.out.println(node);
+		//System.out.println(node);
 		if(node.visited == true){
 			return;  // Node already visited 
 		}
-		node.visited = true;
 
 		if(node.player == 0) {
+			node.visited = true;
 			current_plain.push(node);
 		} else {
 			current_plain_players.push(node.player);
@@ -151,7 +169,6 @@ public class app {
 			System.out.println();
 		}
 	}
-
 	
 	public static void main(String[] args) throws Exception {
 		System.setIn(new java.io.FileInputStream("swTest/src/swTest/black_and_white.txt"));
@@ -178,7 +195,6 @@ public class app {
 						current_plain = new Stack(map_size*map_size);
 						current_plain_players = new Int_Stack(map_size*map_size);
 						walk(x, y);
-						System.out.println(current_plain_players.is_homogenic);
 						if(current_plain_players.is_homogenic && current_plain_players.peek() == 1){
 							while(current_plain.is_empty() == false){
 								black_points.push(current_plain.pop());
@@ -193,7 +209,7 @@ public class app {
 			}
 			//print_map();
 			// Sum the map
-			System.out.println("#" + test_case + " " + (white_points.top + 1 - black_points.top + 1));
+			System.out.println("#" + test_case + " " + ((black_points.top + 1) - (white_points.top + 1)));
 			
 		}
 		
