@@ -3,152 +3,155 @@ import java.util.Scanner;
 
 public class app {
 
-	public static Stack visited;
+	public static Stack current_plain;
+	public static Int_Stack current_plain_players;
+	public static Stack black_points;  // player 1
+	public static Stack white_points;  // player 2
 	public static int map_size;
-	public static int[][] map;
-	public static int field_val;
-	public static int one_sum_before;  // black
-	public static int two_sum_before;  // white
-	public static int one_sum_after;   // black
-	public static int two_sum_after;   // white
-	public static int curr_field;
-	
-	public static class Stack {
-		public int top;
-		public int stack_size;
-		public int[][] stack;
+	public static Node[][] map;
 
-		public Stack(int size) {
-			this.stack_size = size;
-			stack = new int[size][2];
-			for(int i = 0; i < size; i++) {
-				stack[i][0] = -1;
-				stack[i][1] = -1;
+	/*
+	 * Answer to 1st TC is 3 - 11 = -8
+	 * Answer to 2nd TC is 0 - 0 = 0
+	 */
+	
+	public static class Node {
+		public int x;
+		public int y;
+		public int player;
+		public boolean visited;
+		
+		public Node(int x, int y, int p) {
+			this.x = x;
+			this.y = y;
+			this.player = p;
+			this.visited = false;
+		}
+		@Override
+		public String toString(){
+			if(this.visited == true){
+				return "P" + this.player + "O" + "@" + this.x + "," + this.y;
+			} else {
+				return "P" + this.player + "X" + "@" + this.x + "," + this.y;
 			}
-			top=-1;
-		}
-		public void push(int[] cords){
-			top += 1;
-			stack[top] = cords;
-		}
-		public int[] pop(){
-			int[] cords = {stack[top][0], stack[top][1]};
-			top -= 1;
-			return cords;
-		}
-		public boolean isEmpty(){
-			return top==-1;
-		}
-		public boolean inStack(int x, int y){
-			for(int i=0; i< this.stack_size; i++){
-				if(stack[i][0] == x && stack[i][1] == y){
-					return true;
-				}
-			}
-			return false;
-		}
-		public void print(){
-			for(int i = 0; i < this.top; i++){
-				System.out.print(stack[i][0] + "," + stack[i][1] + "  ");
-			}
-			System.out.println();
+			 
+			
 		}
 	}
 	
-	public static int walk(int startx, int starty, int player){
-		if(visited.inStack(startx, starty)){
-			//System.out.println("visited: " + startx + "," + starty);
-			return player;  // Node already visited 
+	public static class Int_Stack {
+		public int top;
+		public int[] stack;
+		public boolean is_homogenic;
+		
+		public Int_Stack(int size) {
+			this.stack = new int[size];
+			this.top = -1;
+			this.is_homogenic = true;
 		}
+		public void push(int x){
+			int last_item = this.peek();
+			if(last_item >= 0 && last_item != x){
+				this.is_homogenic = false;
+			}
+			this.top += 1;
+			this.stack[top] = x;
+		}
+		public int pop() {
+			int last_item = this.stack[this.top];
+			this.top -= 1;
+			return last_item;
+		}
+		public int peek(){
+			if(this.top >= 0){
+				return this.stack[this.top];
+			}
+			return -1;
+		}
+	}
+	
+	public static class Stack {
+		public int top;
+		public Node[] stack;
+		
+		public Stack(int size) {
+			this.stack = new Node[size];
+			this.top = -1;
+		}
+		public void push(Node node){
+			this.top += 1;
+			this.stack[top] = node;
+		}
+		public Node pop() {
+			Node last_item = this.stack[this.top];
+			this.top -= 1;
+			return last_item;
+		}
+		public boolean is_empty(){
+			return this.top == -1;
+		}
+	}
 
-		int[] cords = {startx, starty};
-		visited.push(cords);
-		if(player == 0 && map[startx][starty] != 0){ // Found a player
-			player = map[startx][starty];
-			return player;
-		} else if (player != 0  && map[startx][starty] != 0 && map[startx][starty] != player){  // failed enclosure
-			player = 3;
-			//System.out.println("Failed enclosure @ " + startx + "," + starty);
-			return player;
+	
+	public static void walk(int x, int y){
+		Node node = map[y][x];
+		System.out.println(node);
+		if(node.visited == true){
+			return;  // Node already visited 
 		}
-			
-			
-		if(player == 0) {
-			// Go down
-			if(startx < map_size - 1){
-				player = walk(startx + 1, starty, player);
-			}
-			// Go right
-			if(starty < map_size - 1){
-				player = walk(startx, starty + 1, player);
-			}
-			// Go up
-			if(startx > 0){
-				player = walk(startx - 1, starty, player);
-			}
-			// Go left
-			if(starty > 0){
-				player = walk(startx, starty - 1, player);
-			}
+		node.visited = true;
+
+		if(node.player == 0) {
+			current_plain.push(node);
 		} else {
-			// Go down
-			if(startx < map_size - 1){
-				walk(startx + 1, starty, player);
-			}
-			// Go right
-			if(starty < map_size - 1){
-				walk(startx, starty + 1, player);
-			}
-			// Go up
-			if(startx > 0){
-				walk(startx - 1, starty, player);
-			}
-			// Go left
-			if(starty > 0){
-				walk(startx, starty - 1, player);
-			}
+			current_plain_players.push(node.player);
+			return;
 		}
 		
-		return player;
+		// Go right
+		if(x < map_size - 1){
+			walk(x + 1, y);
+		}
+		// Go down
+		if(node.y < map_size - 1){
+			walk(x, y + 1);
+		}
+		// Go left
+		if(x > 0){
+			walk(x - 1, y);
+		}
+		// Go up
+		if(y > 0){
+			walk(x, y - 1);
+		}
+
+		return;
 	}
 	
 	public static void init_values(Scanner sc) {
 		map_size = sc.nextInt();
-		map = new int[map_size][map_size];
-		one_sum_before = 0;
-		two_sum_before = 0;
-		one_sum_after = 0;
-		two_sum_after = 0;
+		map = new Node[map_size][map_size];
+		black_points = new Stack(map_size*map_size);
+		white_points = new Stack(map_size*map_size);
 	}
 	
 	public static void read_map(Scanner sc) {
-		for(int i = 0; i < map_size; i++){
-			for(int o = 0; o < map_size; o++){
-				field_val = sc.nextInt();
-				if(field_val == 1){
-					one_sum_before += 1;
-				} else if (field_val == 2){
-					two_sum_before += 1;
-				}
-				map[i][o] = field_val;
+		for(int y = 0; y < map_size; y++){
+			for(int x = 0; x < map_size; x++){
+				map[y][x] = new Node(x, y, sc.nextInt());
 			}
 		}
 	}
 	
-	public static void sum_map() {
-		for(int i = 0; i < map_size; i++){
-			for(int o = 0; o < map_size; o++){
-				field_val = map[i][o];
-				System.out.print(field_val);  // Print map
-				if(field_val == 4){
-					one_sum_after += 1;
-				} else if (field_val == 5){
-					two_sum_after += 1;
-				}
+	public static void print_map(){
+		for(int y = 0; y < map_size; y++){
+			for(int x = 0; x < map_size; x++){
+				System.out.print(map[y][x] + "  ");
 			}
-			System.out.println(); // Print map
+			System.out.println();
 		}
 	}
+
 	
 	public static void main(String[] args) throws Exception {
 		System.setIn(new java.io.FileInputStream("swTest/src/swTest/black_and_white.txt"));
@@ -166,32 +169,31 @@ public class app {
 			// Read the map
 			read_map(sc);
 			
-			
+			//print_map();
 			// Walk the map
-			for(int i = 0; i < map_size; i++){
-				for(int o = 0; o < map_size; o++){
-					curr_field = map[i][o];
-					if(curr_field == 0){
+			for(int y = 0; y < map_size; y++){
+				for(int x = 0; x < map_size; x++){
+					if(map[y][x].visited == false && map[y][x].player == 0){
 						// Check enclosure
-						visited = new Stack(map_size*map_size);// - one_sum_before - two_sum_before);
-						int player = walk(i, o, curr_field);
-						System.out.println(player);
-						while(visited.isEmpty() != true){
-							int[] cords = visited.pop();
-							int x = cords[0];
-							int y = cords[1];
-							if(map[x][y] == 0){
-								map[x][y] = player + 3;
+						current_plain = new Stack(map_size*map_size);
+						current_plain_players = new Int_Stack(map_size*map_size);
+						walk(x, y);
+						System.out.println(current_plain_players.is_homogenic);
+						if(current_plain_players.is_homogenic && current_plain_players.peek() == 1){
+							while(current_plain.is_empty() == false){
+								black_points.push(current_plain.pop());
+							}
+						} else if (current_plain_players.is_homogenic && current_plain_players.peek() == 2){
+							while(current_plain.is_empty() == false){
+								white_points.push(current_plain.pop());
 							}
 						}
 					}
 				}
 			}
-
+			//print_map();
 			// Sum the map
-			sum_map();
-			
-			System.out.println("#" + test_case + " " + ((two_sum_after - two_sum_before) - (one_sum_after - one_sum_before)));
+			System.out.println("#" + test_case + " " + (white_points.top + 1 - black_points.top + 1));
 			
 		}
 		
