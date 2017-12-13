@@ -5,8 +5,8 @@ public class app {
 
 	public static Stack current_plain;
 	public static Int_Stack current_plain_players;
-	public static Stack black_points;  // player 1
-	public static Stack white_points;  // player 2
+	public static int black_points;  // player 1
+	public static int white_points;  // player 2
 	public static int map_size;
 	public static Node[][] map;
 
@@ -100,6 +100,9 @@ public class app {
 		public boolean is_empty(){
 			return this.top == -1;
 		}
+		public int size(){
+			return this.top + 1;
+		}
 		@Override
 		public String toString() {
 			String str = new String();
@@ -149,8 +152,8 @@ public class app {
 	public static void init_values(Scanner sc) {
 		map_size = sc.nextInt();
 		map = new Node[map_size][map_size];
-		black_points = new Stack(map_size*map_size);
-		white_points = new Stack(map_size*map_size);
+		black_points = 0;
+		white_points = 0;
 	}
 	
 	public static void read_map(Scanner sc) {
@@ -196,20 +199,16 @@ public class app {
 						current_plain_players = new Int_Stack(map_size*map_size);
 						walk(x, y);
 						if(current_plain_players.is_homogenic && current_plain_players.peek() == 1){
-							while(current_plain.is_empty() == false){
-								black_points.push(current_plain.pop());
-							}
+							black_points += current_plain.size();
 						} else if (current_plain_players.is_homogenic && current_plain_players.peek() == 2){
-							while(current_plain.is_empty() == false){
-								white_points.push(current_plain.pop());
-							}
+							white_points += current_plain.size();
 						}
 					}
 				}
 			}
 			//print_map();
 			// Sum the map
-			System.out.println("#" + test_case + " " + ((black_points.top + 1) - (white_points.top + 1)));
+			System.out.println("#" + test_case + " " + (black_points - white_points));
 			
 		}
 		
